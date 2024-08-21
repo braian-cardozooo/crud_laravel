@@ -18,3 +18,6 @@ Route::get('/', function () {
 });
 
 Route::resource('client', App\Http\Controllers\ClientController::class);
+
+
+

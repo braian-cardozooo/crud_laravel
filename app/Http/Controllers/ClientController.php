@@ -11,10 +11,19 @@ class ClientController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $clients = Client::paginate(5);
+        // Capturar el término de búsqueda si existe
+        $search = $request->input('search');
 
+        // Filtrar los clientes según el término de búsqueda
+        $clients = Client::when($search, function ($query, $search) {
+            return $query->where('name', 'like', "%{$search}%")
+                ->orWhere('due', 'like', "%{$search}%")
+                ->orWhere('moments', 'like', "%{$search}%");
+        })->paginate(5); // Paginación de 5 resultados por página
+
+        // Retornar la vista con los clientes filtrados
         return view('client.index')->with('clients', $clients);
     }
 
@@ -37,14 +46,10 @@ class ClientController extends Controller
             'moments' => 'required'
         ]);
 
-        $client = Client::create($request->only('name', 'due', 'moments'));
+        Client::create($request->only('name', 'due', 'moments'));
 
-        session::flash('mensaje', 'el archivo se guardo correctamente');
-        
-
-       return redirect()->route('client.index');
-
-        
+        session::flash('mensaje', 'El archivo se guardó correctamente');
+        return redirect()->route('client.index');
     }
 
     /**
@@ -60,9 +65,7 @@ class ClientController extends Controller
      */
     public function edit(Client $client)
     {
-        
         return view('client.form')->with('client', $client);
-
     }
 
     /**
@@ -70,22 +73,21 @@ class ClientController extends Controller
      */
     public function update(Request $request, Client $client)
     {
+    
+     
+        
         $request->validate([
             'name' => 'required',
             'due' => 'required',
             'moments' => 'required'
         ]);
-
-        $client->name =$request['name'];
-        $client->due =$request['due'];
-        $client->moments =$request['moments'];
-        $client->save();
-
-        session::flash('mensaje', 'el archivo se edito correctamente');
-        
-
-       return redirect()->route('client.index');
+    
+        $client->update($request->only('name', 'due', 'moments'));
+    
+        session::flash('mensaje', 'El archivo se editó correctamente');
+        return redirect()->route('client.index');
     }
+    
 
     /**
      * Remove the specified resource from storage.
@@ -93,9 +95,7 @@ class ClientController extends Controller
     public function destroy(Client $client)
     {
         $client->delete();
-        session::flash('mensaje', 'el archivo se elimino correctamente');
-        
-
+        session::flash('mensaje', 'El archivo se eliminó correctamente');
         return redirect()->route('client.index');
     }
 }
