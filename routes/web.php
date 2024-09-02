@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClientController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,12 +13,15 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
+Route::get('client/pdf', [ClientController::class, 'pdf'])->name('client.pdf');
 Route::get('/', function () {
     return view('welcome');
 });
 
 Route::resource('client', App\Http\Controllers\ClientController::class);
+
+
+
 
 
 

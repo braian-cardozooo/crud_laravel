@@ -1,10 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+
+
+
+
 
 class ClientController extends Controller
 {
@@ -16,7 +20,7 @@ class ClientController extends Controller
         // Capturar el término de búsqueda si existe
         $search = $request->input('search');
 
-        // Filtrar los clientes según el término de búsqueda
+        // Filtrar los clientes según el término de búsqueda y aplicar paginación
         $clients = Client::when($search, function ($query, $search) {
             return $query->where('name', 'like', "%{$search}%")
                 ->orWhere('due', 'like', "%{$search}%")
@@ -25,6 +29,16 @@ class ClientController extends Controller
 
         // Retornar la vista con los clientes filtrados
         return view('client.index')->with('clients', $clients);
+        
+    }
+
+    public function pdf()
+    {
+       $clients=client::all();
+       $pdf = Pdf::loadView('client.pdf', compact('clients'));
+       return $pdf->stream();
+
+       
     }
 
     /**
@@ -48,16 +62,8 @@ class ClientController extends Controller
 
         Client::create($request->only('name', 'due', 'moments'));
 
-        session::flash('mensaje', 'El archivo se guardó correctamente');
+        Session::flash('mensaje', 'El archivo se guardó correctamente');
         return redirect()->route('client.index');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Client $client)
-    {
-        //
     }
 
     /**
@@ -73,21 +79,17 @@ class ClientController extends Controller
      */
     public function update(Request $request, Client $client)
     {
-    
-     
-        
         $request->validate([
             'name' => 'required',
             'due' => 'required',
             'moments' => 'required'
         ]);
-    
+
         $client->update($request->only('name', 'due', 'moments'));
-    
-        session::flash('mensaje', 'El archivo se editó correctamente');
+
+        Session::flash('mensaje', 'El archivo se editó correctamente');
         return redirect()->route('client.index');
     }
-    
 
     /**
      * Remove the specified resource from storage.
@@ -95,7 +97,7 @@ class ClientController extends Controller
     public function destroy(Client $client)
     {
         $client->delete();
-        session::flash('mensaje', 'El archivo se eliminó correctamente');
+        Session::flash('mensaje', 'El archivo se eliminó correctamente');
         return redirect()->route('client.index');
     }
 }

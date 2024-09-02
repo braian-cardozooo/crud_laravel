@@ -48,6 +48,8 @@
                     </tr>
                 @endforelse
             </tbody>
+            <a href="{{ route('client.pdf') }}" class="btn btn-secondary mt-n3 mb-3">Generar Reporte de Cliente</a>
+
         </table>
 
         @if ($clients->count())
